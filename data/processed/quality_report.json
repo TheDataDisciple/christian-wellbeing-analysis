@@ -1,0 +1,21 @@
+{
+  "raw_rows": 4149,
+  "weighted_core_rows": 3544,
+  "rows_excluded_missing_weight": 605,
+  "eligible_grouped_rows": 3483,
+  "rows_excluded_unmapped_or_missing_religion": 61,
+  "belief_group_counts": {
+    "Christian": 2273,
+    "No religious affiliation": 977,
+    "Other faith": 233
+  },
+  "metric_valid_rows": {
+    "good_or_better_pct": 3480,
+    "physical_8plus_pct": 1891,
+    "mental_8plus_pct": 1873
+  },
+  "weight": "WTSSNRPS",
+  "variance_design": "VSTRAT + VPSU; Taylor-linearized ratio estimator",
+  "confidence_level": 0.95,
+  "respondent_level_data_published": false
+}
