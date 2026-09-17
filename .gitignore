@@ -1,0 +1,10 @@
+data/raw/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+*.pbix
+*.pbit
+*.tmp
+~$*
+

@@ -1,0 +1,12 @@
+{
+  "dataset": "2022 General Social Survey (cross-section)",
+  "publisher": "NORC at the University of Chicago",
+  "source_url": "https://gss.norc.org/content/dam/gss/get-the-data/documents/stata/2022_stata.zip",
+  "downloaded_on": "2026-09-17",
+  "archive_sha256": "ba0bc3255ce59d5351b8e5382c81d9d29ad6275d61cf24f6f027b69ef2e97fd0",
+  "stata_member": "2022/GSS2022.dta",
+  "codebook_member": "2022/GSS 2022 Codebook.pdf",
+  "raw_data_committed": false,
+  "citation": "General Social Survey, 2022 Cross-section, NORC at the University of Chicago."
+}
+
