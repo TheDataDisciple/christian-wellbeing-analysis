@@ -1,0 +1,30 @@
+{
+  "name": "Christian Wellbeing — Evidence First",
+  "dataColors": ["#17324D", "#B38B2E", "#73777A"],
+  "background": "#FFFFFF",
+  "foreground": "#262626",
+  "tableAccent": "#17324D",
+  "good": "#17324D",
+  "neutral": "#73777A",
+  "bad": "#9C4F3D",
+  "minimum": "#F2F3F4",
+  "center": "#D9DEE2",
+  "maximum": "#17324D",
+  "textClasses": {
+    "callout": {"fontFace": "Segoe UI Semibold", "fontSize": 28, "color": "#262626"},
+    "title": {"fontFace": "Segoe UI Semibold", "fontSize": 16, "color": "#262626"},
+    "header": {"fontFace": "Segoe UI Semibold", "fontSize": 12, "color": "#262626"},
+    "label": {"fontFace": "Segoe UI", "fontSize": 11, "color": "#3F3F3F"}
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "background": [{"show": true, "color": {"solid": {"color": "#FFFFFF"}}, "transparency": 0}],
+        "border": [{"show": false}],
+        "visualHeader": [{"show": false}],
+        "title": [{"show": true, "fontFamily": "Segoe UI Semibold", "fontSize": 13, "fontColor": {"solid": {"color": "#262626"}}}]
+      }
+    }
+  }
+}
+

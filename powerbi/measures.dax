@@ -1,0 +1,17 @@
+-- These measures operate on the aggregate ChartData table.
+
+Estimate % =
+DIVIDE(MAX(ChartData[estimate]), 100)
+
+CI Low % =
+DIVIDE(MAX(ChartData[ci_low]), 100)
+
+CI High % =
+DIVIDE(MAX(ChartData[ci_high]), 100)
+
+Valid Respondents =
+MAX(ChartData[unweighted_n])
+
+Source Label =
+"Source: General Social Survey 2022 · WTSSNRPS weighted · 95% design-adjusted CI"
+
