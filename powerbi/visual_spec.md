@@ -8,6 +8,15 @@
 - Subtitle: **Survey-weighted descriptive estimates, GSS 2022**
 - Qualification: **Association does not establish that faith causes health outcomes.**
 
+## Service implementation
+
+The Power BI Service report uses a single clustered horizontal bar chart with
+all three metrics, a zero baseline, direct value labels, and a visible
+"descriptive association, not causation" subtitle. This layout keeps the
+aggregate-only web report legible in one view. The reproducible PNG/PDF export
+implements the two-panel design below and displays the 95% confidence intervals
+directly.
+
 ## Main visual
 
 - Native clustered horizontal bar chart
@@ -43,4 +52,5 @@
 - Do not rely on color alone; retain direct series labels and tooltips.
 - Verify every displayed number against `chart_data.csv`.
 - Inspect at standard and narrow browser widths and in grayscale.
-
+- Static exports are generated with `python scripts/render_chart.py` from
+  `data/processed/chart_data.csv`.

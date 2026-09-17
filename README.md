@@ -3,6 +3,8 @@
 An evidence-first portfolio project about self-reported health and religious
 affiliation among U.S. adults in the 2022 General Social Survey.
 
+![Faith and self-reported health chart](powerbi/exports/christian_wellbeing_report.png)
+
 > **Core principle:** these results describe associations. They do not show
 > that religious faith causes better or worse health.
 
@@ -25,15 +27,22 @@ income, education, community support, access to care, or other confounders.
 
 ## Power BI report
 
-The public report link will be added after the aggregate-only semantic model is
-verified and published. Report design and field configuration are documented in
+The aggregate-only Power BI report has been built and verified in Power BI
+Service. Its public link will be added after the final public-access confirmation.
+Report design and field configuration are documented in
 [`powerbi/visual_spec.md`](powerbi/visual_spec.md).
+
+Portfolio exports: [PNG](powerbi/exports/christian_wellbeing_report.png) ·
+[PDF](powerbi/exports/christian_wellbeing_report.pdf). They are generated from
+the same nine-row aggregate dataset and show the design-adjusted 95% confidence
+intervals directly.
 
 ## Reproduce the analysis
 
 ```powershell
 python scripts/download_data.py
 python scripts/analyze.py
+python scripts/render_chart.py
 python -m unittest discover -s tests -v
 ```
 
@@ -47,7 +56,7 @@ aggregate file in `data/processed/chart_data.csv`.
 - `tests/`: mapping, schema, range, release-count, and result regression tests
 - `data/processed/`: aggregate Power BI input and data-quality receipt
 - `docs/`: methodology and public data dictionary
-- `powerbi/`: theme, DAX, Power Query, and visual specification
+- `powerbi/`: theme, DAX, Power Query, visual specification, and static exports
 - `linkedin/`: final English LinkedIn draft
 
 ## Method summary
@@ -64,4 +73,3 @@ NORC at the University of Chicago. Source data is not redistributed by this
 repository. Users should consult the GSS documentation and terms before use.
 
 Project code is released under the [MIT License](LICENSE).
-
