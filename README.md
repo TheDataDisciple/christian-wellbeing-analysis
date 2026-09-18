@@ -27,9 +27,9 @@ income, education, community support, access to care, or other confounders.
 
 ## Power BI report
 
-The aggregate-only Power BI report has been built and verified in Power BI
-Service. Its public link will be added after the final public-access confirmation.
-Report design and field configuration are documented in
+The [interactive Power BI report](https://app.powerbi.com/view?r=eyJrIjoiYzczNGI3ZTctYjY1NS00MmRiLWFhMDYtOTA3MjBjMDhhMTQ2IiwidCI6ImEwNzg4YjhlLWYwNDktNGY1YS04OGEyLTY3NTliZWY2OWM3NiIsImMiOjl9)
+uses an aggregate-only semantic model and loads without authentication. Report
+design and field configuration are documented in
 [`powerbi/visual_spec.md`](powerbi/visual_spec.md).
 
 Portfolio exports: [PNG](powerbi/exports/christian_wellbeing_report.png) ·
