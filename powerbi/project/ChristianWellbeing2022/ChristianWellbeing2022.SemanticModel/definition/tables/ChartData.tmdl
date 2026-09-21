@@ -1,0 +1,225 @@
+/// Aggregate-only GSS 2022 estimates used by the two report pages.
+table ChartData
+	lineageTag: b26225c8-c7f0-4baf-9bf1-f7ed582d0b0e
+
+	/// Context-aware estimate. Rows store percentages on a 0-100 scale.
+	measure 'Estimate %' = DIVIDE(MAX('ChartData'[estimate]), 100)
+		formatString: 0.0%
+		lineageTag: 31c35225-b506-40a4-a1ea-b36f553d015f
+
+	measure 'CI Low %' = DIVIDE(MAX('ChartData'[ci_low]), 100)
+		formatString: 0.0%
+		lineageTag: 111dcc19-9146-4dfd-88e3-da16316623f0
+
+	measure 'CI High %' = DIVIDE(MAX('ChartData'[ci_high]), 100)
+		formatString: 0.0%
+		lineageTag: 640e346e-1dc2-4e91-a49f-7a1139ab33e0
+
+	measure 'Valid Respondents' = MAX('ChartData'[unweighted_n])
+		formatString: #,0
+		lineageTag: 93fd73ad-9a6b-4ae5-82f8-1c99f821ae55
+
+	measure 'Source Label' = "Source: General Social Survey 2022. Weighted by WTSSNRPS; 95% confidence intervals use VSTRAT and VPSU."
+		lineageTag: 8cf5b919-d492-4c93-bafc-a424e4268080
+
+	measure 'Group Order' = MIN('ChartData'[sort_order])
+		formatString: 0
+		lineageTag: b09d40d1-18c6-4256-932b-f0cae0fc28f4
+
+	measure 'Mental Health %' = CALCULATE([Estimate %], 'ChartData'[metric_id] = "mental_8plus_pct")
+		formatString: 0.0%
+		lineageTag: 5ef50b68-e2dc-4702-93aa-5b23a98b4fb2
+
+	measure 'Mental Health CI Low %' = CALCULATE([CI Low %], 'ChartData'[metric_id] = "mental_8plus_pct")
+		formatString: 0.0%
+		lineageTag: da59ad44-2439-42b8-af0b-4a9aed1183a1
+
+	measure 'Mental Health CI High %' = CALCULATE([CI High %], 'ChartData'[metric_id] = "mental_8plus_pct")
+		formatString: 0.0%
+		lineageTag: 7f39befd-7405-4858-b585-4848c6d07a1b
+
+	measure 'Mental Health Respondents' = CALCULATE([Valid Respondents], 'ChartData'[metric_id] = "mental_8plus_pct")
+		formatString: #,0
+		lineageTag: 4ab2b042-290f-41e8-a26c-b1e6401848ae
+
+	/// Data-bound dot-and-whisker alternative for the mental-health landing page.
+	measure 'Mental Health Dot Whisker SVG' = ```
+		VAR PlotLeft = 268
+		VAR PlotWidth = 840
+		VAR AxisMax = 35
+		VAR MentalRows =
+		    FILTER ( ALL ( 'ChartData' ), 'ChartData'[metric_id] = "mental_8plus_pct" )
+		VAR Grid =
+		    CONCATENATEX (
+		        GENERATESERIES ( 0, AxisMax, 5 ),
+		        VAR Tick = [Value]
+		        VAR X = PlotLeft + DIVIDE ( Tick, AxisMax ) * PlotWidth
+		        RETURN
+		            "<line x1='" & FORMAT ( X, "0.0" ) & "' y1='63' x2='"
+		            & FORMAT ( X, "0.0" )
+		            & "' y2='450' stroke='rgb(225,229,232)' stroke-width='1' stroke-dasharray='2 5'/>"
+		            & "<text x='" & FORMAT ( X, "0.0" )
+		            & "' y='486' text-anchor='middle' font-family='Segoe UI' font-size='19' fill='rgb(95,101,106)'>"
+		            & FORMAT ( Tick, "0" ) & "%</text>",
+		        "",
+		        [Value], ASC
+		    )
+		VAR Marks =
+		    CONCATENATEX (
+		        MentalRows,
+		        VAR Y = 120 + ( 'ChartData'[sort_order] - 1 ) * 145
+		        VAR XLow = PlotLeft + DIVIDE ( 'ChartData'[ci_low], AxisMax ) * PlotWidth
+		        VAR XHigh = PlotLeft + DIVIDE ( 'ChartData'[ci_high], AxisMax ) * PlotWidth
+		        VAR XEstimate = PlotLeft + DIVIDE ( 'ChartData'[estimate], AxisMax ) * PlotWidth
+		        RETURN
+		            "<text x='240' y='" & FORMAT ( Y - 2, "0" )
+		            & "' text-anchor='end' font-family='Segoe UI' font-size='24' fill='rgb(52,61,67)'>"
+		            & 'ChartData'[belief_group] & "</text>"
+		            & "<text x='240' y='" & FORMAT ( Y + 24, "0" )
+		            & "' text-anchor='end' font-family='Segoe UI' font-size='15' fill='rgb(115,119,122)'>n = "
+		            & FORMAT ( 'ChartData'[unweighted_n], "#,0" ) & "</text>"
+		            & "<line x1='" & FORMAT ( XLow, "0.0" )
+		            & "' y1='" & FORMAT ( Y, "0" )
+		            & "' x2='" & FORMAT ( XHigh, "0.0" )
+		            & "' y2='" & FORMAT ( Y, "0" )
+		            & "' stroke='rgb(115,119,122)' stroke-width='3'/>"
+		            & "<line x1='" & FORMAT ( XLow, "0.0" )
+		            & "' y1='" & FORMAT ( Y - 10, "0" )
+		            & "' x2='" & FORMAT ( XLow, "0.0" )
+		            & "' y2='" & FORMAT ( Y + 10, "0" )
+		            & "' stroke='rgb(115,119,122)' stroke-width='3'/>"
+		            & "<line x1='" & FORMAT ( XHigh, "0.0" )
+		            & "' y1='" & FORMAT ( Y - 10, "0" )
+		            & "' x2='" & FORMAT ( XHigh, "0.0" )
+		            & "' y2='" & FORMAT ( Y + 10, "0" )
+		            & "' stroke='rgb(115,119,122)' stroke-width='3'/>"
+		            & "<circle cx='" & FORMAT ( XEstimate, "0.0" )
+		            & "' cy='" & FORMAT ( Y, "0" )
+		            & "' r='12' fill='rgb(23,54,93)' stroke='white' stroke-width='3'/>"
+		            & "<text x='" & FORMAT ( XEstimate, "0.0" )
+		            & "' y='" & FORMAT ( Y - 25, "0" )
+		            & "' text-anchor='middle' font-family='Segoe UI' font-size='21' font-weight='600' fill='rgb(23,54,93)'>"
+		            & FORMAT ( 'ChartData'[estimate], "0.00" ) & "%</text>",
+		        "",
+		        'ChartData'[sort_order], ASC
+		    )
+		RETURN
+		    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 520' preserveAspectRatio='xMidYMid meet'>"
+		    & Grid & Marks & "</svg>"
+		```
+		dataCategory: ImageUrl
+		lineageTag: 33bb102f-8bcf-4c80-a945-42dcfd7a4883
+
+	measure 'General Health %' = CALCULATE([Estimate %], 'ChartData'[metric_id] = "good_or_better_pct")
+		formatString: 0.0%
+		lineageTag: 1c3380e9-a315-45f0-a4fc-58479539f2e3
+
+	measure 'General Health CI Low %' = CALCULATE([CI Low %], 'ChartData'[metric_id] = "good_or_better_pct")
+		formatString: 0.0%
+		lineageTag: 8fc1afaf-fbb4-4e27-b57d-ce07f820b31c
+
+	measure 'General Health CI High %' = CALCULATE([CI High %], 'ChartData'[metric_id] = "good_or_better_pct")
+		formatString: 0.0%
+		lineageTag: 65d3f087-485d-4fc8-85d5-3b67e08cb262
+
+	measure 'General Health Respondents' = CALCULATE([Valid Respondents], 'ChartData'[metric_id] = "good_or_better_pct")
+		formatString: #,0
+		lineageTag: 9db6bb87-1b5d-4c07-984d-f0adb2fbe555
+
+	measure 'Physical Health %' = CALCULATE([Estimate %], 'ChartData'[metric_id] = "physical_8plus_pct")
+		formatString: 0.0%
+		lineageTag: 49962ad3-0297-4515-877e-5a7418fb1cb6
+
+	measure 'Physical Health CI Low %' = CALCULATE([CI Low %], 'ChartData'[metric_id] = "physical_8plus_pct")
+		formatString: 0.0%
+		lineageTag: e640e53c-2d95-4340-b776-883d9c70fa18
+
+	measure 'Physical Health CI High %' = CALCULATE([CI High %], 'ChartData'[metric_id] = "physical_8plus_pct")
+		formatString: 0.0%
+		lineageTag: e9075996-fb2f-466d-8a3f-24690869e7fd
+
+	measure 'Physical Health Respondents' = CALCULATE([Valid Respondents], 'ChartData'[metric_id] = "physical_8plus_pct")
+		formatString: #,0
+		lineageTag: 87ea68dc-cf53-42f5-b54d-c105f6c8d4cf
+
+	column belief_group
+		dataType: string
+		lineageTag: 31df8ae4-fb18-4f7a-ac4a-f738aa89e2f4
+		summarizeBy: none
+		sourceColumn: belief_group
+		sortByColumn: sort_order
+
+	column metric_id
+		dataType: string
+		lineageTag: 2ec75df8-5534-4100-b193-b4c57bef9b18
+		summarizeBy: none
+		sourceColumn: metric_id
+
+	column metric_label
+		dataType: string
+		lineageTag: 9f02069a-2573-4d9f-824b-9cb337390f91
+		summarizeBy: none
+		sourceColumn: metric_label
+
+	column estimate
+		dataType: double
+		formatString: 0.00
+		lineageTag: 17b66dfb-b970-49e4-bbcc-19674c0afe88
+		summarizeBy: none
+		sourceColumn: estimate
+
+	column ci_low
+		dataType: double
+		formatString: 0.00
+		lineageTag: ef871339-7827-4e70-aef4-e7383d272736
+		summarizeBy: none
+		sourceColumn: ci_low
+
+	column ci_high
+		dataType: double
+		formatString: 0.00
+		lineageTag: d9612cd2-a696-46f1-bfab-ab407784f006
+		summarizeBy: none
+		sourceColumn: ci_high
+
+	column unit
+		dataType: string
+		lineageTag: 5579d310-c12f-4712-bcee-11d20a9ce24d
+		summarizeBy: none
+		sourceColumn: unit
+
+	column unweighted_n
+		dataType: int64
+		formatString: #,0
+		lineageTag: 7bbb0908-4dbf-4562-a2f0-636bfc20c603
+		summarizeBy: sum
+		sourceColumn: unweighted_n
+
+	column source_year
+		dataType: int64
+		formatString: 0
+		lineageTag: d53ef128-a4cc-4bdc-8bdb-07eb8c960a5f
+		summarizeBy: none
+		sourceColumn: source_year
+
+	column sort_order
+		dataType: int64
+		formatString: 0
+		lineageTag: 56e28f0a-5cdb-4d9c-a9c4-b8bd1f5613c5
+		summarizeBy: none
+		sourceColumn: sort_order
+
+	partition ChartData = m
+		mode: import
+		source =
+				#table(type table [belief_group=text, metric_id=text, metric_label=text, estimate=number, ci_low=number, ci_high=number, unit=text, unweighted_n=Int64.Type, source_year=Int64.Type, sort_order=Int64.Type], {
+				    {"Christian", "good_or_better_pct", "Excellent or good general health", 72.45, 69.17, 75.73, "% of adults", 2272, 2022, 1},
+				    {"Other faith", "good_or_better_pct", "Excellent or good general health", 75.85, 67.58, 84.12, "% of adults", 233, 2022, 2},
+				    {"No religious affiliation", "good_or_better_pct", "Excellent or good general health", 70.96, 66.37, 75.56, "% of adults", 975, 2022, 3},
+				    {"Christian", "mental_8plus_pct", "8+ mentally unhealthy days (past 30 days)", 14.65, 11.24, 18.05, "% of adults", 1157, 2022, 1},
+				    {"Other faith", "mental_8plus_pct", "8+ mentally unhealthy days (past 30 days)", 22.52, 11.66, 33.37, "% of adults", 125, 2022, 2},
+				    {"No religious affiliation", "mental_8plus_pct", "8+ mentally unhealthy days (past 30 days)", 25.42, 19.92, 30.92, "% of adults", 591, 2022, 3},
+				    {"Christian", "physical_8plus_pct", "8+ physically unhealthy days (past 30 days)", 8.48, 6.09, 10.88, "% of adults", 1166, 2022, 1},
+				    {"Other faith", "physical_8plus_pct", "8+ physically unhealthy days (past 30 days)", 8.83, 1.91, 15.74, "% of adults", 124, 2022, 2},
+				    {"No religious affiliation", "physical_8plus_pct", "8+ physically unhealthy days (past 30 days)", 11.10, 6.87, 15.33, "% of adults", 601, 2022, 3}
+				})

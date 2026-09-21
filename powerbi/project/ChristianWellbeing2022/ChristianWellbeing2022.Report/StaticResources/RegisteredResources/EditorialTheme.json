@@ -1,0 +1,26 @@
+{
+  "name": "Cairo-inspired editorial",
+  "dataColors": [
+    "#17365D",
+    "#B8860B",
+    "#5B7FA3",
+    "#73777A"
+  ],
+  "background": "#FFFFFF",
+  "foreground": "#263238",
+  "tableAccent": "#17365D",
+  "textClasses": {
+    "label": {
+      "fontFace": "Segoe UI",
+      "fontSize": 12
+    },
+    "title": {
+      "fontFace": "Segoe UI",
+      "fontSize": 16
+    },
+    "callout": {
+      "fontFace": "Segoe UI",
+      "fontSize": 34
+    }
+  }
+}

@@ -32,6 +32,24 @@ uses an aggregate-only semantic model and loads without authentication. Report
 design and field configuration are documented in
 [`powerbi/visual_spec.md`](powerbi/visual_spec.md).
 
+The editable portfolio source is a text-based Power BI Project at
+[`powerbi/project/ChristianWellbeing2022/ChristianWellbeing2022.pbip`](powerbi/project/ChristianWellbeing2022/ChristianWellbeing2022.pbip).
+It contains two 1600 × 1080 pages:
+
+1. **Mental Health** — the landing page, focused on adults reporting eight or
+   more mentally unhealthy days in the past month.
+2. **Full Health Overview** — general health above aligned physical- and
+   mental-health comparisons.
+
+All four charts display absolute, field-driven 95% confidence intervals. The
+PBIP embeds only the nine reviewed aggregate rows and is automatically checked
+against `data/processed/chart_data.csv`. The existing public report has not
+been replaced; this redesign remains a local-review release candidate.
+
+The final Desktop PDF and two page screenshots are pending visual QA. They will
+be added to this review branch before the PR is marked ready. The earlier
+Python-rendered portfolio figure remains available below.
+
 Portfolio exports: [PNG](powerbi/exports/christian_wellbeing_report.png) ·
 [PDF](powerbi/exports/christian_wellbeing_report.pdf). They are generated from
 the same nine-row aggregate dataset and show the design-adjusted 95% confidence
@@ -56,7 +74,7 @@ aggregate file in `data/processed/chart_data.csv`.
 - `tests/`: mapping, schema, range, release-count, and result regression tests
 - `data/processed/`: aggregate Power BI input and data-quality receipt
 - `docs/`: methodology and public data dictionary
-- `powerbi/`: theme, DAX, Power Query, visual specification, and static exports
+- `powerbi/`: editable PBIP source, theme, visual specification, and verified exports
 - `linkedin/`: final English LinkedIn draft
 
 ## Method summary

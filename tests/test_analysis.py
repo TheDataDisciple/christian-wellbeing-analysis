@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import csv
+import json
+import re
 import sys
 import unittest
 from pathlib import Path
@@ -96,6 +99,122 @@ class OutputTests(unittest.TestCase):
             self.assertAlmostEqual(float(indexed.loc[key]), value, places=2)
 
 
+class PowerBIProjectTests(unittest.TestCase):
+    """Keep the aggregate-only PBIP table synchronized with the reviewed CSV."""
+
+    PBIP_ROOT = ROOT / "powerbi" / "project" / "ChristianWellbeing2022"
+    TABLE_FILE = (
+        PBIP_ROOT
+        / "ChristianWellbeing2022.SemanticModel"
+        / "definition"
+        / "tables"
+        / "ChartData.tmdl"
+    )
+    PAGES_ROOT = PBIP_ROOT / "ChristianWellbeing2022.Report" / "definition" / "pages"
+    ROW_PATTERN = re.compile(
+        r'\{"([^"]+)", "([^"]+)", "([^"]+)", '
+        r'([0-9.]+), ([0-9.]+), ([0-9.]+), "([^"]+)", '
+        r'(\d+), (\d+), (\d+)\}'
+    )
+
+    @staticmethod
+    def _normalized_row(values: list[str] | tuple[str, ...]) -> tuple[object, ...]:
+        return (
+            values[0], values[1], values[2],
+            round(float(values[3]), 2),
+            round(float(values[4]), 2),
+            round(float(values[5]), 2),
+            values[6], int(values[7]), int(values[8]), int(values[9]),
+        )
+
+    def test_embedded_chart_data_matches_csv(self) -> None:
+        with (ROOT / "data" / "processed" / "chart_data.csv").open(
+            newline="", encoding="utf-8"
+        ) as source:
+            csv_rows = [
+                self._normalized_row(tuple(row.values()))
+                for row in csv.DictReader(source)
+            ]
+        tmdl_rows = [
+            self._normalized_row(match)
+            for match in self.ROW_PATTERN.findall(
+                self.TABLE_FILE.read_text(encoding="utf-8")
+            )
+        ]
+        self.assertEqual(tmdl_rows, csv_rows)
+
+    def test_pbip_contains_no_private_or_binary_inputs(self) -> None:
+        tracked_text = "\n".join(
+            path.read_text(encoding="utf-8", errors="ignore")
+            for path in self.PBIP_ROOT.rglob("*")
+            if path.is_file() and path.suffix in {".pbip", ".pbir", ".json", ".tmdl", ".pbism"}
+        )
+        self.assertNotIn("GSS 2024", tracked_text)
+        self.assertNotRegex(tracked_text, r"[A-Za-z]:[\\/]Users[\\/]")
+        self.assertFalse(any(self.PBIP_ROOT.rglob("*.pbix")))
+        self.assertFalse(any(self.PBIP_ROOT.rglob("*.pbit")))
+
+    def test_required_pages_measures_and_accessibility_metadata_exist(self) -> None:
+        pages = (
+            self.PBIP_ROOT
+            / "ChristianWellbeing2022.Report"
+            / "definition"
+            / "pages"
+            / "pages.json"
+        ).read_text(encoding="utf-8")
+        model = self.TABLE_FILE.read_text(encoding="utf-8")
+        visuals = "\n".join(
+            path.read_text(encoding="utf-8")
+            for path in self.PBIP_ROOT.rglob("visual.json")
+        )
+        self.assertLess(pages.index('"MentalHealth"'), pages.index('"FullHealthOverview"'))
+        self.assertIn('"activePageName": "MentalHealth"', pages)
+        for measure in (
+            "Estimate %", "CI Low %", "CI High %", "Valid Respondents", "Source Label",
+        ):
+            self.assertIn(f"measure '{measure}'", model)
+        self.assertEqual(visuals.count('"altText"'), 4)
+        self.assertEqual(visuals.count('"errorRange"'), 4)
+
+    def test_charts_bind_metric_specific_bounds_and_fixed_scales(self) -> None:
+        charts = {
+            ("MentalHealth", "Dashboard_current"): ("Mental Health", "0.35D"),
+            ("FullHealthOverview", "Growth_current"): ("General Health", "1D"),
+            ("FullHealthOverview", "Growth_gain"): ("Physical Health", "0.35D"),
+            ("FullHealthOverview", "Growth_gain_history"): ("Mental Health", "0.35D"),
+        }
+        for (page, visual_name), (metric, axis_max) in charts.items():
+            with self.subTest(page=page, visual=visual_name):
+                path = self.PAGES_ROOT / page / "visuals" / visual_name / "visual.json"
+                visual = json.loads(path.read_text(encoding="utf-8"))["visual"]
+                self.assertEqual(visual["visualType"], "clusteredBarChart")
+                query = visual["query"]["queryState"]
+                self.assertEqual(
+                    query["Y"]["projections"][0]["field"]["Measure"]["Property"],
+                    f"{metric} %",
+                )
+                tooltip_measures = {
+                    projection["field"]["Measure"]["Property"]
+                    for projection in query["Tooltips"]["projections"]
+                }
+                self.assertEqual(
+                    tooltip_measures,
+                    {f"{metric} CI Low %", f"{metric} CI High %", f"{metric} Respondents"},
+                )
+                axis = visual["objects"]["valueAxis"][0]["properties"]
+                self.assertEqual(axis["start"]["expr"]["Literal"]["Value"], "0D")
+                self.assertEqual(axis["end"]["expr"]["Literal"]["Value"], axis_max)
+                bounds = visual["objects"]["error"][0]["properties"]["errorRange"]["explicit"]
+                self.assertEqual(
+                    bounds["lowerBound"]["expr"]["Measure"]["Property"],
+                    f"{metric} CI Low %",
+                )
+                self.assertEqual(
+                    bounds["upperBound"]["expr"]["Measure"]["Property"],
+                    f"{metric} CI High %",
+                )
+                self.assertEqual(bounds["isRelative"]["expr"]["Literal"]["Value"], "false")
+
+
 if __name__ == "__main__":
     unittest.main()
-
