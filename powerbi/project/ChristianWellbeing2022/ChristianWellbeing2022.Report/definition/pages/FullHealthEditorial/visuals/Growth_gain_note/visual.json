@@ -1,13 +1,13 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
-  "name": "Dashboard_current_note",
+  "name": "Growth_gain_note",
   "position": {
-    "x": 90,
-    "y": 850,
-    "z": 3000,
-    "height": 74,
+    "x": 34.044602544807773,
+    "y": 1027.0121767683679,
+    "z": 5000,
+    "height": 52,
     "width": 1420,
-    "tabOrder": 3000
+    "tabOrder": 5000
   },
   "visual": {
     "visualType": "textbox",
@@ -19,12 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Valid respondents (n): Christian 1,157 · Other faith 125 · No religious affiliation 591. These are descriptive differences, not evidence that faith causes better or worse health.",
+                    "value": "Valid respondents: Christian 1,166 · Other faith 124 · No religious affiliation 601.",
                     "textStyle": {
-                      "fontFamily": "Segoe UI",
-                      "fontSize": "10pt",
-                      "color": "#22313B",
-                      "fontWeight": "normal"
+                      "fontFamily": "Georgia",
+                      "fontSize": "16pt",
+                      "color": "#808080"
                     }
                   }
                 ]

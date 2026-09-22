@@ -155,33 +155,32 @@ class PowerBIProjectTests(unittest.TestCase):
         self.assertFalse(any(self.PBIP_ROOT.rglob("*.pbit")))
 
     def test_required_pages_measures_and_accessibility_metadata_exist(self) -> None:
-        pages = (
-            self.PBIP_ROOT
-            / "ChristianWellbeing2022.Report"
-            / "definition"
-            / "pages"
-            / "pages.json"
-        ).read_text(encoding="utf-8")
+        pages = json.loads((self.PAGES_ROOT / "pages.json").read_text(encoding="utf-8"))
         model = self.TABLE_FILE.read_text(encoding="utf-8")
-        visuals = "\n".join(
-            path.read_text(encoding="utf-8")
-            for path in self.PBIP_ROOT.rglob("visual.json")
+        visual_files = list(self.PAGES_ROOT.rglob("visual.json"))
+        visuals = [json.loads(path.read_text(encoding="utf-8")) for path in visual_files]
+        self.assertEqual(
+            pages["pageOrder"], ["MentalHealthEditorial", "FullHealthEditorial"]
         )
-        self.assertLess(pages.index('"MentalHealth"'), pages.index('"FullHealthOverview"'))
-        self.assertIn('"activePageName": "MentalHealth"', pages)
+        self.assertEqual(pages["activePageName"], "MentalHealthEditorial")
+        self.assertEqual(
+            {path.name for path in self.PAGES_ROOT.iterdir() if path.is_dir()},
+            set(pages["pageOrder"]),
+        )
         for measure in (
             "Estimate %", "CI Low %", "CI High %", "Valid Respondents", "Source Label",
         ):
             self.assertIn(f"measure '{measure}'", model)
-        self.assertEqual(visuals.count('"altText"'), 4)
-        self.assertEqual(visuals.count('"errorRange"'), 4)
+        charts = [item["visual"] for item in visuals if item["visual"]["visualType"] == "clusteredBarChart"]
+        self.assertEqual(len(charts), 3)
+        self.assertTrue(all("altText" in chart["visualContainerObjects"]["general"][0]["properties"] for chart in charts))
+        self.assertTrue(all("errorRange" in chart["objects"]["error"][0]["properties"] for chart in charts))
 
     def test_charts_bind_metric_specific_bounds_and_fixed_scales(self) -> None:
         charts = {
-            ("MentalHealth", "Dashboard_current"): ("Mental Health", "0.35D"),
-            ("FullHealthOverview", "Growth_current"): ("General Health", "1D"),
-            ("FullHealthOverview", "Growth_gain"): ("Physical Health", "0.35D"),
-            ("FullHealthOverview", "Growth_gain_history"): ("Mental Health", "0.35D"),
+            ("MentalHealthEditorial", "Dashboard_current"): ("Mental Health", "0.35D"),
+            ("FullHealthEditorial", "Growth_current"): ("General Health", "1D"),
+            ("FullHealthEditorial", "Growth_gain"): ("Physical Health", "0.35D"),
         }
         for (page, visual_name), (metric, axis_max) in charts.items():
             with self.subTest(page=page, visual=visual_name):
@@ -204,6 +203,8 @@ class PowerBIProjectTests(unittest.TestCase):
                 axis = visual["objects"]["valueAxis"][0]["properties"]
                 self.assertEqual(axis["start"]["expr"]["Literal"]["Value"], "0D")
                 self.assertEqual(axis["end"]["expr"]["Literal"]["Value"], axis_max)
+                self.assertEqual(axis["show"]["expr"]["Literal"]["Value"], "false")
+                self.assertEqual(axis["gridlineShow"]["expr"]["Literal"]["Value"], "false")
                 bounds = visual["objects"]["error"][0]["properties"]["errorRange"]["explicit"]
                 self.assertEqual(
                     bounds["lowerBound"]["expr"]["Measure"]["Property"],
@@ -214,6 +215,10 @@ class PowerBIProjectTests(unittest.TestCase):
                     f"{metric} CI High %",
                 )
                 self.assertEqual(bounds["isRelative"]["expr"]["Literal"]["Value"], "false")
+                self.assertEqual(
+                    visual["objects"]["error"][1]["properties"]["enabled"]["expr"]["Literal"]["Value"],
+                    "false",
+                )
 
 
 if __name__ == "__main__":

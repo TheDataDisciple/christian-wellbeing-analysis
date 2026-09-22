@@ -1,13 +1,13 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
-  "name": "Growth_gain_history",
+  "name": "Growth_gain",
   "position": {
-    "x": 830,
-    "y": 585,
-    "z": 6000,
-    "height": 320,
-    "width": 730,
-    "tabOrder": 6000
+    "x": 34.044602544807773,
+    "y": 624.15104665480919,
+    "z": 4000,
+    "height": 402.86113011355866,
+    "width": 1477.1574770830484,
+    "tabOrder": 4000
   },
   "visual": {
     "visualType": "clusteredBarChart",
@@ -42,10 +42,10 @@
                       "Entity": "ChartData"
                     }
                   },
-                  "Property": "Mental Health CI Low %"
+                  "Property": "Physical Health CI Low %"
                 }
               },
-              "queryRef": "ChartData.Mental Health CI Low %",
+              "queryRef": "ChartData.Physical Health CI Low %",
               "nativeQueryRef": "95% CI lower"
             },
             {
@@ -56,10 +56,10 @@
                       "Entity": "ChartData"
                     }
                   },
-                  "Property": "Mental Health CI High %"
+                  "Property": "Physical Health CI High %"
                 }
               },
-              "queryRef": "ChartData.Mental Health CI High %",
+              "queryRef": "ChartData.Physical Health CI High %",
               "nativeQueryRef": "95% CI upper"
             },
             {
@@ -70,10 +70,10 @@
                       "Entity": "ChartData"
                     }
                   },
-                  "Property": "Mental Health Respondents"
+                  "Property": "Physical Health Respondents"
                 }
               },
-              "queryRef": "ChartData.Mental Health Respondents",
+              "queryRef": "ChartData.Physical Health Respondents",
               "nativeQueryRef": "Valid respondents"
             }
           ]
@@ -88,10 +88,10 @@
                       "Entity": "ChartData"
                     }
                   },
-                  "Property": "Mental Health %"
+                  "Property": "Physical Health %"
                 }
               },
-              "queryRef": "ChartData.Mental Health %",
+              "queryRef": "ChartData.Physical Health %",
               "nativeQueryRef": "Estimate",
               "displayName": "Estimate"
             }
@@ -130,7 +130,7 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "12D"
+                  "Value": "15D"
                 }
               }
             },
@@ -168,7 +168,7 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "12D"
+                  "Value": "15D"
                 }
               }
             },
@@ -188,7 +188,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
+                  "Value": "false"
                 }
               }
             },
@@ -200,6 +200,13 @@
               }
             },
             "showAxisTitle": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
+            "gridlineShow": {
               "expr": {
                 "Literal": {
                   "Value": "false"
@@ -258,7 +265,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#5B7FA3'"
+                      "Value": "'#17365D'"
                     }
                   }
                 }
@@ -288,7 +295,7 @@
                           "Entity": "ChartData"
                         }
                       },
-                      "Property": "Mental Health CI Low %"
+                      "Property": "Physical Health CI Low %"
                     }
                   }
                 },
@@ -300,7 +307,7 @@
                           "Entity": "ChartData"
                         }
                       },
-                      "Property": "Mental Health CI High %"
+                      "Property": "Physical Health CI High %"
                     }
                   }
                 }
@@ -315,7 +322,7 @@
                 }
               }
             ],
-            "metadata": "ChartData.Mental Health %",
+            "metadata": "ChartData.Physical Health %",
             "highlightMatching": 1
           }
         },
@@ -324,13 +331,13 @@
             "enabled": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
+                  "Value": "false"
                 }
               }
             }
           },
           "selector": {
-            "metadata": "ChartData.Mental Health %"
+            "metadata": "ChartData.Physical Health %"
           }
         }
       ]
@@ -349,21 +356,21 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'8+ mentally unhealthy days in the past month'"
+                  "Value": "'8+ physically unhealthy days'"
                 }
               }
             },
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "16D"
+                  "Value": "27D"
                 }
               }
             },
             "fontFamily": {
               "expr": {
                 "Literal": {
-                  "Value": "'Segoe UI'"
+                  "Value": "'Georgia'"
                 }
               }
             },
@@ -372,7 +379,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#22313B'"
+                      "Value": "'#17365D'"
                     }
                   }
                 }
@@ -427,7 +434,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Horizontal comparison of adults reporting 8 or more mentally unhealthy days in the past month: Christian 14.65%, Other faith 22.52%, and no religious affiliation 25.42%, with 95% confidence intervals.'"
+                  "Value": "'Horizontal comparison of adults reporting 8 or more physically unhealthy days in the past month: Christian 8.48%, Other faith 8.83%, and no religious affiliation 11.10%. 95% confidence intervals are available in tooltips.'"
                 }
               }
             }

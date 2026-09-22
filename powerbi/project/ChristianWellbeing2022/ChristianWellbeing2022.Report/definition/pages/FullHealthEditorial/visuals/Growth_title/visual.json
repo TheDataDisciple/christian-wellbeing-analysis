@@ -1,12 +1,12 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
-  "name": "Dashboard_title",
+  "name": "Growth_title",
   "position": {
-    "x": 90,
-    "y": 30,
+    "x": 34.044602544807773,
+    "y": 0,
     "z": 0,
-    "height": 86,
-    "width": 1420,
+    "height": 79.4374059378848,
+    "width": 1496.071145163497,
     "tabOrder": 0
   },
   "visual": {
@@ -19,11 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Frequent mentally unhealthy days differ across religious-affiliation groups",
+                    "value": "Health across religious groups",
                     "textStyle": {
                       "fontWeight": "bold",
-                      "fontFamily": "Segoe UI",
-                      "fontSize": "28pt",
+                      "fontFamily": "Georgia",
+                      "fontSize": "32pt",
                       "color": "#17365d"
                     }
                   }
