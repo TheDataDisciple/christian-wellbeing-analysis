@@ -5,8 +5,7 @@ affiliation among U.S. adults in the 2022 General Social Survey.
 
 ![Mental health by religious affiliation, Power BI Desktop editorial report](powerbi/exports/christian_wellbeing_editorial_2022-1.png)
 
-> **Core principle:** these results describe associations. They do not show
-> that religious faith causes better or worse health.
+> **Core principle:** these results describe associations.
 
 ## The question
 
