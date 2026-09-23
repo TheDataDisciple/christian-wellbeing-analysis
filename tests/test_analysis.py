@@ -220,6 +220,143 @@ class PowerBIProjectTests(unittest.TestCase):
                     "false",
                 )
 
+    def test_mobile_layouts_are_complete_ordered_and_full_width(self) -> None:
+        expected = {
+            "MentalHealthEditorial": [
+                "Dashboard_current",
+                "Dashboard_current_note",
+            ],
+            "FullHealthEditorial": [
+                "Growth_title",
+                "Growth_subtitle",
+                "Growth_current",
+                "Growth_current_note",
+                "Growth_gain",
+                "Growth_gain_note",
+            ],
+        }
+        schema = (
+            "https://developer.microsoft.com/json-schemas/fabric/item/report/"
+            "definition/visualContainerMobileState/2.4.0/schema.json"
+        )
+        for page, visual_names in expected.items():
+            with self.subTest(page=page):
+                mobile_files = {
+                    path.parent.name: path
+                    for path in (self.PAGES_ROOT / page / "visuals").glob("*/mobile.json")
+                }
+                self.assertEqual(set(mobile_files), set(visual_names))
+                layouts = [
+                    json.loads(mobile_files[name].read_text(encoding="utf-8"))
+                    for name in visual_names
+                ]
+                self.assertTrue(all(layout["$schema"] == schema for layout in layouts))
+                positions = [layout["position"] for layout in layouts]
+                self.assertTrue(all(position["x"] == 0 for position in positions))
+                self.assertTrue(all(position["width"] == 323 for position in positions))
+                self.assertEqual(
+                    [position["y"] for position in positions],
+                    sorted(position["y"] for position in positions),
+                )
+                self.assertEqual(
+                    [position["tabOrder"] for position in positions],
+                    sorted(position["tabOrder"] for position in positions),
+                )
+                for current, following in zip(positions, positions[1:]):
+                    gap = following["y"] - (current["y"] + current["height"])
+                    self.assertGreaterEqual(gap, 6)
+                    self.assertLessEqual(gap, 8)
+
+                def explicit_font_sizes(value: object) -> list[float]:
+                    sizes: list[float] = []
+                    if isinstance(value, dict):
+                        for key, child in value.items():
+                            if key == "fontSize":
+                                if isinstance(child, str) and child.endswith("pt"):
+                                    sizes.append(float(child.removesuffix("pt")))
+                                elif isinstance(child, dict):
+                                    literal = child.get("expr", {}).get("Literal", {})
+                                    dax_value = literal.get("Value")
+                                    if isinstance(dax_value, str) and dax_value.endswith("D"):
+                                        sizes.append(float(dax_value.removesuffix("D")))
+                            sizes.extend(explicit_font_sizes(child))
+                    elif isinstance(value, list):
+                        for child in value:
+                            sizes.extend(explicit_font_sizes(child))
+                    return sizes
+
+                for visual_name in visual_names:
+                    visual = json.loads(
+                        (mobile_files[visual_name].parent / "visual.json").read_text(
+                            encoding="utf-8"
+                        )
+                    )
+                    sizes = explicit_font_sizes(visual)
+                    self.assertTrue(sizes, f"No explicit font size in {visual_name}")
+                    self.assertGreaterEqual(min(sizes), 9)
+
+    def test_readme_uses_only_the_canonical_public_report(self) -> None:
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        canonical = (
+            "https://app.powerbi.com/view?r="
+            "eyJrIjoiMWNmYzlkY2UtOGZjOS00ZTFiLWJmY2UtOTIxYTkwMDM5MGFiIiwidCI6"
+            "ImEwNzg4YjhlLWYwNDktNGY1YS04OGEyLTY3NTliZWY2OWM3NiIsImMiOjl9"
+            "&pageName=MentalHealthEditorial"
+        )
+        self.assertGreaterEqual(readme.count(canonical), 2)
+        self.assertNotIn("app.powerbi.com/groups/me/reports/", readme)
+        self.assertNotIn("Previous reference version", readme)
+        self.assertIn("02 | Health Context", readme)
+        self.assertIn("## Codex plugins and skills used", readme)
+        self.assertIn("Notion Knowledge Capture", readme)
+
+    def test_public_facing_release_documentation_is_complete(self) -> None:
+        canonical = (
+            "https://app.powerbi.com/view?r="
+            "eyJrIjoiMWNmYzlkY2UtOGZjOS00ZTFiLWJmY2UtOTIxYTkwMDM5MGFiIiwidCI6"
+            "ImEwNzg4YjhlLWYwNDktNGY1YS04OGEyLTY3NTliZWY2OWM3NiIsImMiOjl9"
+            "&pageName=MentalHealthEditorial"
+        )
+        iframe = (
+            '<iframe title="ChristianWellbeing2022" width="600" height="373.5" '
+            f'src="{canonical}" frameborder="0" allowFullScreen="true"></iframe>'
+        )
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        normalized_readme = " ".join(readme.replace("-\n", "-").split())
+        for required in (
+            "## View the live interactive Power BI report",
+            "No Power BI sign-in is required",
+            "## Technologies and workflow",
+            "## Notion project log",
+            "## Codex plugins and skills used",
+            "powerbi/exports/christian_wellbeing_editorial_2022-1.png",
+            "powerbi/exports/christian_wellbeing_editorial_2022-2.png",
+            iframe,
+        ):
+            self.assertIn(required, readme)
+        self.assertIn(
+            "Respondent-level GSS data is not included and is not licensed under MIT",
+            normalized_readme,
+        )
+        self.assertIn(
+            "users must obtain it from the official GSS source", normalized_readme
+        )
+
+        public_documents = [
+            ROOT / "README.md",
+            ROOT / "linkedin" / "post.md",
+            ROOT / "powerbi" / "visual_spec.md",
+            ROOT / "powerbi" / "EDITORIAL_REVIEW_2022.md",
+        ]
+        combined = "\n".join(
+            path.read_text(encoding="utf-8") for path in public_documents
+        )
+        self.assertIn(canonical, combined)
+        self.assertNotIn("app.powerbi.com/groups/me/reports/", combined)
+        self.assertNotIn("YzczNGI3ZTctYjY1NS00MmRiLWFhMDYtOTA3MjBjMDhhMTQ2", combined)
+        self.assertNotIn("Previous reference version", combined)
+        self.assertNotRegex(combined, r"[A-Za-z]:[\\/]Users[\\/]")
+
 
 if __name__ == "__main__":
     unittest.main()
