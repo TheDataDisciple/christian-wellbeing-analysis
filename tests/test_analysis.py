@@ -310,6 +310,53 @@ class PowerBIProjectTests(unittest.TestCase):
         self.assertIn("## Codex plugins and skills used", readme)
         self.assertIn("Notion Knowledge Capture", readme)
 
+    def test_public_facing_release_documentation_is_complete(self) -> None:
+        canonical = (
+            "https://app.powerbi.com/view?r="
+            "eyJrIjoiMWNmYzlkY2UtOGZjOS00ZTFiLWJmY2UtOTIxYTkwMDM5MGFiIiwidCI6"
+            "ImEwNzg4YjhlLWYwNDktNGY1YS04OGEyLTY3NTliZWY2OWM3NiIsImMiOjl9"
+            "&pageName=MentalHealthEditorial"
+        )
+        iframe = (
+            '<iframe title="ChristianWellbeing2022" width="600" height="373.5" '
+            f'src="{canonical}" frameborder="0" allowFullScreen="true"></iframe>'
+        )
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        normalized_readme = " ".join(readme.replace("-\n", "-").split())
+        for required in (
+            "## View the live interactive Power BI report",
+            "No Power BI sign-in is required",
+            "## Technologies and workflow",
+            "## Notion project log",
+            "## Codex plugins and skills used",
+            "powerbi/exports/christian_wellbeing_editorial_2022-1.png",
+            "powerbi/exports/christian_wellbeing_editorial_2022-2.png",
+            iframe,
+        ):
+            self.assertIn(required, readme)
+        self.assertIn(
+            "Respondent-level GSS data is not included and is not licensed under MIT",
+            normalized_readme,
+        )
+        self.assertIn(
+            "users must obtain it from the official GSS source", normalized_readme
+        )
+
+        public_documents = [
+            ROOT / "README.md",
+            ROOT / "linkedin" / "post.md",
+            ROOT / "powerbi" / "visual_spec.md",
+            ROOT / "powerbi" / "EDITORIAL_REVIEW_2022.md",
+        ]
+        combined = "\n".join(
+            path.read_text(encoding="utf-8") for path in public_documents
+        )
+        self.assertIn(canonical, combined)
+        self.assertNotIn("app.powerbi.com/groups/me/reports/", combined)
+        self.assertNotIn("YzczNGI3ZTctYjY1NS00MmRiLWFhMDYtOTA3MjBjMDhhMTQ2", combined)
+        self.assertNotIn("Previous reference version", combined)
+        self.assertNotRegex(combined, r"[A-Za-z]:[\\/]Users[\\/]")
+
 
 if __name__ == "__main__":
     unittest.main()
