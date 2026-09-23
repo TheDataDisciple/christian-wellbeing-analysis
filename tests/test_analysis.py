@@ -263,9 +263,37 @@ class PowerBIProjectTests(unittest.TestCase):
                     sorted(position["tabOrder"] for position in positions),
                 )
                 for current, following in zip(positions, positions[1:]):
-                    self.assertLessEqual(
-                        current["y"] + current["height"], following["y"]
+                    gap = following["y"] - (current["y"] + current["height"])
+                    self.assertGreaterEqual(gap, 6)
+                    self.assertLessEqual(gap, 8)
+
+                def explicit_font_sizes(value: object) -> list[float]:
+                    sizes: list[float] = []
+                    if isinstance(value, dict):
+                        for key, child in value.items():
+                            if key == "fontSize":
+                                if isinstance(child, str) and child.endswith("pt"):
+                                    sizes.append(float(child.removesuffix("pt")))
+                                elif isinstance(child, dict):
+                                    literal = child.get("expr", {}).get("Literal", {})
+                                    dax_value = literal.get("Value")
+                                    if isinstance(dax_value, str) and dax_value.endswith("D"):
+                                        sizes.append(float(dax_value.removesuffix("D")))
+                            sizes.extend(explicit_font_sizes(child))
+                    elif isinstance(value, list):
+                        for child in value:
+                            sizes.extend(explicit_font_sizes(child))
+                    return sizes
+
+                for visual_name in visual_names:
+                    visual = json.loads(
+                        (mobile_files[visual_name].parent / "visual.json").read_text(
+                            encoding="utf-8"
+                        )
                     )
+                    sizes = explicit_font_sizes(visual)
+                    self.assertTrue(sizes, f"No explicit font size in {visual_name}")
+                    self.assertGreaterEqual(min(sizes), 9)
 
     def test_readme_uses_only_the_canonical_public_report(self) -> None:
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
