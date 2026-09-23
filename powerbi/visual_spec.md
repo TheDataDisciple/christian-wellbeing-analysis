@@ -1,56 +1,72 @@
 # Power BI Visual Specification
 
-## Page
+## Design direction
 
-- Name: **Faith and Health**
-- Canvas: 16:9, white background
-- Header: **Faith and self-reported health in the United States**
-- Subtitle: **Survey-weighted descriptive estimates, GSS 2022**
-- Qualification: **Association does not establish that faith causes health outcomes.**
+The two-page editorial report uses a human-centered explanatory style inspired
+by Alberto Cairo's principles of clarity, honesty, context, and uncertainty.
+It does not reproduce a particular Cairo design. Georgia headings, navy bars,
+direct percentage labels, quiet respondent notes, and generous whitespace keep
+attention on the comparison. Numeric axes, gridlines, decorative marks, and
+visible error bars are suppressed in the current design.
 
-## Service implementation
+The order is always Christian, Other faith, and No religious affiliation.
+Color does not encode spiritual worth or a causal claim. The bars have zero
+baselines and fixed metric-appropriate ranges. The 95% confidence intervals
+remain bound to data fields and are available in interactive tooltips, not in
+static screenshots.
 
-The Power BI Service report uses a single clustered horizontal bar chart with
-all three metrics, a zero baseline, direct value labels, and a visible
-"descriptive association, not causation" subtitle. This layout keeps the
-aggregate-only web report legible in one view. The reproducible PNG/PDF export
-implements the two-panel design below and displays the 95% confidence intervals
-directly.
+## Page 1 — 01 | Mental Health
 
-## Main visual
+- Canvas: 1600 × 1080; opening page.
+- One native horizontal bar chart: share of U.S. adults reporting 8+ mentally
+  unhealthy days in the past month, GSS 2022.
+- Estimates: Christian 14.65%; Other faith 22.52%; No religious affiliation
+  25.42%.
+- Fixed scale: 0–35%. The chart displays direct percentages and a note with
+  valid respondent counts of 1,157, 125, and 591 respectively.
+- Tooltip fields: estimate, lower and upper 95% confidence bounds, and valid
+  respondent count.
 
-- Native clustered horizontal bar chart
-- Filter: `metric_id = good_or_better_pct`
-- Y-axis: `belief_group`, sorted by `sort_order`
-- X-axis: `Estimate %`, fixed from 0% to 100%
-- Error bars: lower `CI Low %`, upper `CI High %`
-- Direct labels: one decimal place
-- Tooltip: metric label, estimate, confidence bounds, valid respondents
-- Color: single deep navy (`#17324D`); identity is already carried by the axis
-- Title: **Most adults in every affiliation group report good or excellent health**
+## Page 2 — 02 | Health Context
 
-## Supporting visual
+- Canvas: 1600 × 1080, matching the opening page's editorial treatment.
+- Top native horizontal bar chart: excellent or good general health, fixed
+  0–100% scale; estimates 72.45%, 75.85%, and 70.96%.
+- Bottom native horizontal bar chart: 8+ physically unhealthy days in the
+  past month, fixed 0–35% scale; estimates 8.48%, 8.83%, and 11.10%.
+- Each chart has direct percentages, a metric-specific respondent note,
+  accessible alt text, and tooltip-bound 95% confidence limits.
 
-- Native clustered horizontal bar chart
-- Filter: `metric_id` in `physical_8plus_pct`, `mental_8plus_pct`
-- Y-axis: `belief_group`, sorted by `sort_order`
-- Series: `metric_label`
-- X-axis: 0% to 35%
-- Error bars use the corresponding lower and upper measures
-- Colors: navy for physical health, muted gold for mental health
-- Title: **Frequent mentally unhealthy days vary more than physical-health days**
+## Model and provenance
 
-## Footer
+The text-based PBIP project is in `powerbi/project/ChristianWellbeing2022/`.
+Its Power Query M `ChartData` partition embeds only the nine reviewed
+aggregate rows from `data/processed/chart_data.csv`; it contains no
+respondent-level records or absolute local paths. TMDL defines the semantic
+model and DAX measures. PBIR files define the pages and visuals.
 
-- Source label from the DAX measure
-- Note: “No religious affiliation is not equivalent to atheist. Samples differ by metric.”
-- Link text: “Methods and reproducible code: GitHub”
+Source: General Social Survey 2022. Estimates use `WTSSNRPS`; 95% confidence
+intervals use the survey-design variables `VSTRAT` and `VPSU`. Metric-specific
+missing responses are excluded; valid sample sizes therefore differ.
 
-## Accessibility and QA
+## Interpretation and accessibility
 
-- Add descriptive alt text to each visual.
-- Do not rely on color alone; retain direct series labels and tooltips.
-- Verify every displayed number against `chart_data.csv`.
-- Inspect at standard and narrow browser widths and in grayscale.
-- Static exports are generated with `python scripts/render_chart.py` from
-  `data/processed/chart_data.csv`.
+These are descriptive differences, not evidence that faith causes better or
+worse health. No religious affiliation is not equivalent to atheist. The Other
+faith group is smaller and has wider confidence intervals. The report and its
+accompanying copy should make those caveats visible even though the intervals
+themselves appear only on hover. All three charts have direct values and alt
+text; interpretation does not depend on color alone.
+
+## Release checks
+
+- Open the `.pbip` in Power BI Desktop and confirm both pages load without
+  repair or schema warnings, with Mental Health first.
+- Compare all nine estimates, interval bounds, and respondent counts with the
+  processed CSV; exercise tooltips on all three charts.
+- Verify fixed zero-based scales, group order, visible source/caveat copy, and
+  alt text in Desktop and in Power BI Service.
+- Export both pages and inspect for clipping, overlap, and readability before
+  making a Desktop screenshot the README lead image.
+- Run `python -m unittest discover -s tests -v` and the offline Power BI review
+  before marking the PR ready.

@@ -5,6 +5,9 @@ __pycache__/
 .venv/
 *.pbix
 *.pbit
+**/.pbi/
+*.pbids
+powerbi/review/
+powerbi-ai-change-journal.json
 *.tmp
 ~$*
-
