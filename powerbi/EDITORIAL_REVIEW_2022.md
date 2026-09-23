@@ -60,6 +60,15 @@ confirm the measures in TMDL. The automated release status remains **No-Go**
 until the required Power BI Desktop render, phone-preview inspection, and
 post-publication checks are completed.
 
+Power BI Desktop subsequently round-tripped the PBIP without changing a report
+value, visual binding, or mobile position. Its local file differences are
+newline normalization only. This is local evidence that Desktop accepts the
+project structure, but it is not evidence that the phone canvases are visually
+readable. The full suite now contains **13 passing tests**, including explicit
+checks for 6–8 unit mobile spacing, 323-unit full-width placement, text sizes of
+at least 9 pt, the exact public iframe, technology and plugin disclosure,
+licensing language, and canonical-only public links.
+
 ## Release gate
 
 The release is ready only when:
