@@ -220,6 +220,68 @@ class PowerBIProjectTests(unittest.TestCase):
                     "false",
                 )
 
+    def test_mobile_layouts_are_complete_ordered_and_full_width(self) -> None:
+        expected = {
+            "MentalHealthEditorial": [
+                "Dashboard_current",
+                "Dashboard_current_note",
+            ],
+            "FullHealthEditorial": [
+                "Growth_title",
+                "Growth_subtitle",
+                "Growth_current",
+                "Growth_current_note",
+                "Growth_gain",
+                "Growth_gain_note",
+            ],
+        }
+        schema = (
+            "https://developer.microsoft.com/json-schemas/fabric/item/report/"
+            "definition/visualContainerMobileState/2.4.0/schema.json"
+        )
+        for page, visual_names in expected.items():
+            with self.subTest(page=page):
+                mobile_files = {
+                    path.parent.name: path
+                    for path in (self.PAGES_ROOT / page / "visuals").glob("*/mobile.json")
+                }
+                self.assertEqual(set(mobile_files), set(visual_names))
+                layouts = [
+                    json.loads(mobile_files[name].read_text(encoding="utf-8"))
+                    for name in visual_names
+                ]
+                self.assertTrue(all(layout["$schema"] == schema for layout in layouts))
+                positions = [layout["position"] for layout in layouts]
+                self.assertTrue(all(position["x"] == 0 for position in positions))
+                self.assertTrue(all(position["width"] == 323 for position in positions))
+                self.assertEqual(
+                    [position["y"] for position in positions],
+                    sorted(position["y"] for position in positions),
+                )
+                self.assertEqual(
+                    [position["tabOrder"] for position in positions],
+                    sorted(position["tabOrder"] for position in positions),
+                )
+                for current, following in zip(positions, positions[1:]):
+                    self.assertLessEqual(
+                        current["y"] + current["height"], following["y"]
+                    )
+
+    def test_readme_uses_only_the_canonical_public_report(self) -> None:
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        canonical = (
+            "https://app.powerbi.com/view?r="
+            "eyJrIjoiMWNmYzlkY2UtOGZjOS00ZTFiLWJmY2UtOTIxYTkwMDM5MGFiIiwidCI6"
+            "ImEwNzg4YjhlLWYwNDktNGY1YS04OGEyLTY3NTliZWY2OWM3NiIsImMiOjl9"
+            "&pageName=MentalHealthEditorial"
+        )
+        self.assertGreaterEqual(readme.count(canonical), 2)
+        self.assertNotIn("app.powerbi.com/groups/me/reports/", readme)
+        self.assertNotIn("Previous reference version", readme)
+        self.assertIn("02 | Health Context", readme)
+        self.assertIn("## Codex plugins and skills used", readme)
+        self.assertIn("Notion Knowledge Capture", readme)
+
 
 if __name__ == "__main__":
     unittest.main()
